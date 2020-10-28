@@ -1,6 +1,9 @@
 package blue.endless.jarser.syntax;
 
-public class Token {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Token implements Production {
 	protected final String name;
 	protected final CharSequence value;
 	protected final int startLine;
@@ -17,12 +20,30 @@ public class Token {
 		this.endChar = endChar;
 	}
 	
-	public String getName() { return name; }
-	public CharSequence value() { return value; }
+	//implements Production {
 	
-	public int getStartLine() { return startLine; }
-	public int getStartChar() { return startChar; }
-	public int getEndLine()   { return endLine;   }
-	public int getEndChar()   { return endChar;   }
+		@Override
+		public String getName() { return name; }
+		@Override
+		public CharSequence value() { return value; }
+		@Override
+		public int getStartLine() { return startLine; }
+		@Override
+		public int getStartChar() { return startChar; }
+		@Override
+		public int getEndLine()   { return endLine;   }
+		@Override
+		public int getEndChar()   { return endChar;   }
 	
+		@Override
+		public List<Production> getChildren() {
+			return new ArrayList<>();
+		}
+	
+		@Override
+		public boolean isTerminal() {
+			return true;
+		}
+		
+	//}
 }
