@@ -1,7 +1,17 @@
+/*
+ * Copyright (c) 2020 Isaac Ellingson (Falkreon) and contributors
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 package blue.endless.jarser.test;
 
 import org.junit.Test;
 
+import blue.endless.jarser.Jarser;
+import blue.endless.jarser.syntax.JarserJarser;
 import blue.endless.jarser.syntax.Lexer;
 import blue.endless.jarser.syntax.Token;
 
@@ -31,8 +41,38 @@ public class TestLexer {
 		
 		Token token = lexer.nextToken();
 		while(token!=null) {
-			System.out.println("Token: '"+token.value()+"' named: '"+token.getName()+"'");
+			//System.out.println("Token: '"+token.value()+"' named: '"+token.getName()+"'");
 			token = lexer.nextToken();
 		}
+	}
+	
+	@Test
+	public void testJNF() {
+		Jarser jarser = JarserJarser.createJarser();
+		jarser.startMatching("object = \"{\" keyValuePair* \"}\"");
+		jarser.apply();
+		jarser.apply();
+		
+		/*
+		Lexer lexer = new Lexer();
+		
+		
+		lexer.addRule("quoted_string", "\"(?:[^\"\\\\]|\\\\.)*\"");
+		lexer.addRule("operator", ">=|<=|!=|==|:=|\\+=|-=|\\*=|::|&&|:|\\.|<|>|=|&|\\||%|!|\\+|-|\\*|\\/|\\^");
+		lexer.addRule("token", "[a-zA-Z_]+[a-zA-Z0-9_]*");
+		lexer.addRule("whitespace", "\\s+");
+		lexer.ignoreToken("whitespace");
+		
+		String subject = "object = \"{\" keyValuePair* \"}\"";
+		
+		lexer.startMatching(subject);
+		
+		Token token = lexer.nextToken();
+		while(token!=null) {
+			//if(!token.getName().equals("whitespace")) { //ignore whitespace
+				System.out.println("Token: '"+token.value()+"' named: '"+token.getName()+"'");
+			//}
+			token = lexer.nextToken();
+		}*/
 	}
 }

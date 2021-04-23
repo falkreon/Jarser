@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2020 Isaac Ellingson (Falkreon) and contributors
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 package blue.endless.jarser.syntax;
 
 import java.util.ArrayList;
@@ -116,4 +124,18 @@ public class Nonterminal implements Production {
 		}
 	
 	//}
+	
+	@Override
+	public String toString() {
+		return value().toString();
+		/*
+		StringBuilder result = new StringBuilder();
+		for(int i=0; i<children.size(); i++) {
+			Production p = children.get(i);
+			result.append(p.value());
+			if (i<children.size()-1) result.append(' ');
+		}
+		
+		return result.toString();*/
+	}
 }

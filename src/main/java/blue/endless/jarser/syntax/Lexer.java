@@ -1,6 +1,15 @@
+/*
+ * Copyright (c) 2020 Isaac Ellingson (Falkreon) and contributors
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 package blue.endless.jarser.syntax;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 
 /**
@@ -16,6 +25,7 @@ public class Lexer {
 	protected int line = 0;
 	protected int character = 0;
 	protected ArrayList<LexerRule> rules = new ArrayList<>();
+	protected HashSet<String> ignoreTokens = new HashSet<>();
 	protected CharSequence subject;
 	
 	public Lexer() {
@@ -29,6 +39,10 @@ public class Lexer {
 	
 	public void addRule(LexerRule rule) {
 		rules.add(rule);
+	}
+	
+	public void ignoreToken(String tokenName) {
+		ignoreTokens.add(tokenName);
 	}
 	
 	public void startMatching(CharSequence sequence) {
@@ -54,7 +68,7 @@ public class Lexer {
 		for(int i=0; i<numCharacters; i++) advance();
 	}
 	
-	public Token nextToken() {
+	public Token nextRawToken() {
 		if (pointer>=subject.length()) return null;
 		
 		for(LexerRule rule : rules) {
@@ -77,7 +91,17 @@ public class Lexer {
 		int startLine = line;
 		int startChar = character;
 		advance();
-		//System.out.println("FALLBACK");
 		return new Token("ERROR", result, startLine, startChar, line, character);
+	}
+	
+	public Token nextToken() {
+		while(pointer<subject.length()) {
+			Token next = nextRawToken();
+			if (!ignoreTokens.contains(next.getName())) {
+				return next;
+			}
+		}
+		
+		return null;
 	}
 }
