@@ -8,11 +8,16 @@
 
 package blue.endless.jarser.test;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import blue.endless.jarser.Jarser;
 import blue.endless.jarser.syntax.JarserJarser;
 import blue.endless.jarser.syntax.Lexer;
+import blue.endless.jarser.syntax.Production;
+import blue.endless.jarser.syntax.ProductionRule;
+import blue.endless.jarser.syntax.SyntaxException;
 import blue.endless.jarser.syntax.Token;
 
 public class TestLexer {
@@ -47,12 +52,17 @@ public class TestLexer {
 	}
 	
 	@Test
-	public void testJNF() {
-		Jarser jarser = JarserJarser.createJarser();
-		jarser.startMatching("object = \"{\" keyValuePair* \"}\"");
-		jarser.apply();
-		jarser.apply();
+	public void testJNF() throws SyntaxException {
+		ProductionRule rule = JarserJarser.create("\"object\" = \"{\" keyValuePair* \"}\"");
+		System.out.println(rule.getName()+" = "+rule);
 		
+		
+		
+		//Jarser jarser = JarserJarser.createJarser();
+		//jarser.startMatching("object = \"{\" keyValuePair* \"}\"");
+		//List<Production> ast = jarser.applyAll();
+		
+		//System.out.println(ast);
 		/*
 		Lexer lexer = new Lexer();
 		

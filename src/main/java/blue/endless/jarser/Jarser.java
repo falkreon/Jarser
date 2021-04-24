@@ -41,7 +41,7 @@ public class Jarser {
 		lexer.startMatching(string);
 		Token token = lexer.nextToken();
 		while(token!=null) {
-			System.out.println("Matching "+token.value()+":"+token.getName());
+			//System.out.println("Matching "+token.value()+":"+token.getName());
 			subject.add(token);
 			token = lexer.nextToken();
 		}
@@ -62,18 +62,18 @@ public class Jarser {
 		boolean anythingChanged = false;
 		
 		for(ProductionRule rule : rules) {
-			System.out.println("Considering rule: "+rule.getName());
+			//System.out.println("Considering rule: "+rule.getName());
 			
 			while(!subject.isEmpty()) {
 				if (rule.test(subject)) {
-					System.out.println("Matched rule '"+rule.getName()+"'");
+					//System.out.println("Matched rule '"+rule.getName()+"'");
 					Nonterminal ruleResult = new Nonterminal(rule.getName());
 					rule.produce(subject, ruleResult);
 					nextRound.add(ruleResult);
 					anythingChanged = true;
 				} else {
 					Production p = subject.remove(0);
-					System.out.println("Rejecting "+p.getName());
+					//System.out.println("Rejecting "+p.getName());
 					nextRound.add(p);
 				}
 			}
@@ -83,7 +83,7 @@ public class Jarser {
 			subject = nextRound;
 			nextRound = nextNextRound;
 			
-			System.out.println(subject.toString()); //TODO: This is debug
+			//System.out.println(subject.toString()); //TODO: This is debug
 			
 			if (anythingChanged) break;
 		}
@@ -91,8 +91,10 @@ public class Jarser {
 		return anythingChanged;
 	}
 	
+	private static final int ITERATIONS_MAX = 10000;
 	public List<Production> applyAll() {
-		while(apply()) {}
+		int iterations = 0;
+		while(apply() && iterations<=ITERATIONS_MAX) { iterations++; }
 		return new ArrayList<Production>(subject);
 	}
 }

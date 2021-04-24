@@ -29,7 +29,7 @@ public class RepetitionProductionRule implements ProductionRule {
 			return delegate.test(productions);
 		}
 		
-		if (type==RepetitionType.EXACT_COUNT) {
+		if (type==RepetitionType.EXACT_COUNT || type==RepetitionType.ZERO_OR_ONE) {
 			//Take a copy and consume until we know we're good
 			ArrayList<Production> workingSet = new ArrayList<>(productions);
 			Nonterminal trash = new Nonterminal("repetition");
@@ -61,10 +61,10 @@ public class RepetitionProductionRule implements ProductionRule {
 				productionCount++;
 			}
 			
-			if (type==RepetitionType.EXACT_COUNT && productionCount>=exactCount) return addTo;
+			if ((type==RepetitionType.EXACT_COUNT||type==RepetitionType.ZERO_OR_ONE) && productionCount>=exactCount) return addTo;
 		}
 		
-		//Check two possibilities that result in inconsistent list states.
+		//Check possibilities that result in inconsistent list states.
 		if (type==RepetitionType.ONE_OR_MORE && productionCount<1) throw new IllegalArgumentException();
 		if (type==RepetitionType.EXACT_COUNT && productionCount<exactCount) throw new IllegalArgumentException();
 		
@@ -84,6 +84,25 @@ public class RepetitionProductionRule implements ProductionRule {
 	public static enum RepetitionType {
 		ONE_OR_MORE,
 		ZERO_OR_MORE,
+		ZERO_OR_ONE,
 		EXACT_COUNT;
+	}
+	
+	@Override
+	public String toString() {
+		String result = delegate.toString();
+		
+		switch(type) {
+		case ONE_OR_MORE:
+			return result+"+";
+		case ZERO_OR_MORE:
+			return result+"*";
+		case ZERO_OR_ONE:
+			return result+"?";
+		case EXACT_COUNT:
+			return result+"{"+exactCount+"}";
+		}
+		
+		return result;
 	}
 }

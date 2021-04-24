@@ -42,4 +42,9 @@ public class ElementProductionRule implements ProductionRule {
 	public static ElementProductionRule matchLiteral(String literal) {
 		return new ElementProductionRule(literal, true);
 	}
+	
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

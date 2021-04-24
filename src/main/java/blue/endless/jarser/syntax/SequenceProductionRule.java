@@ -45,4 +45,15 @@ public class SequenceProductionRule implements ProductionRule {
 		for(ProductionRule element : elements ) rule.elements.add(element);
 		return rule;
 	}
+	
+	@Override
+	public String toString() {
+		if (elements.isEmpty()) return "()";
+		StringBuilder result = new StringBuilder();
+		for(int i=0; i<elements.size(); i++) {
+			result.append(elements.get(i).toString());
+			if (i<elements.size()-1) result.append(" ");
+		}
+		return result.toString();
+	}
 }
