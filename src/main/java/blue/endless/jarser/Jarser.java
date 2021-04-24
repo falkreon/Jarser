@@ -15,19 +15,17 @@ import blue.endless.jarser.syntax.Lexer;
 import blue.endless.jarser.syntax.Nonterminal;
 import blue.endless.jarser.syntax.Production;
 import blue.endless.jarser.syntax.ProductionRule;
+import blue.endless.jarser.syntax.Syntax;
 import blue.endless.jarser.syntax.Token;
 
 public class Jarser {
+	protected Syntax syntax;
 	protected Lexer lexer;
 	protected ArrayList<Production> subject = new ArrayList<>();
-	protected ArrayList<ProductionRule> rules = new ArrayList<>();
 	
-	public Jarser() {
-		this.lexer = new Lexer();
-	}
-	
-	public Jarser(Lexer lexer) {
-		this.lexer = lexer;
+	public Jarser(Syntax syntax) {
+		this.syntax = syntax;
+		this.lexer = new Lexer(syntax);
 	}
 	
 	public Jarser startMatching(List<Production> productions) {
@@ -41,15 +39,9 @@ public class Jarser {
 		lexer.startMatching(string);
 		Token token = lexer.nextToken();
 		while(token!=null) {
-			//System.out.println("Matching "+token.value()+":"+token.getName());
 			subject.add(token);
 			token = lexer.nextToken();
 		}
-		return this;
-	}
-	
-	public Jarser addRule(ProductionRule rule) {
-		this.rules.add(rule);
 		return this;
 	}
 	
@@ -61,19 +53,16 @@ public class Jarser {
 		ArrayList<Production> nextRound = new ArrayList<>();
 		boolean anythingChanged = false;
 		
-		for(ProductionRule rule : rules) {
-			//System.out.println("Considering rule: "+rule.getName());
+		for(ProductionRule rule : syntax.getProductionRules()) {
 			
 			while(!subject.isEmpty()) {
 				if (rule.test(subject)) {
-					//System.out.println("Matched rule '"+rule.getName()+"'");
 					Nonterminal ruleResult = new Nonterminal(rule.getName());
 					rule.produce(subject, ruleResult);
 					nextRound.add(ruleResult);
 					anythingChanged = true;
 				} else {
 					Production p = subject.remove(0);
-					//System.out.println("Rejecting "+p.getName());
 					nextRound.add(p);
 				}
 			}
@@ -82,8 +71,6 @@ public class Jarser {
 			ArrayList<Production> nextNextRound = subject;
 			subject = nextRound;
 			nextRound = nextNextRound;
-			
-			//System.out.println(subject.toString()); //TODO: This is debug
 			
 			if (anythingChanged) break;
 		}

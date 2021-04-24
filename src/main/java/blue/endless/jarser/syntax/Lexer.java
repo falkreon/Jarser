@@ -24,31 +24,17 @@ public class Lexer {
 	protected int pointer = 0;
 	protected int line = 0;
 	protected int character = 0;
-	protected ArrayList<LexerRule> rules = new ArrayList<>();
-	protected HashSet<String> ignoreTokens = new HashSet<>();
+	protected Syntax syntax;
 	protected CharSequence subject;
 	
-	public Lexer() {
-		
-	}
-	
-	public void addRule(String name, String pattern) {
-		LexerRule rule = new LexerRule(name, pattern);
-		rules.add(rule);
-	}
-	
-	public void addRule(LexerRule rule) {
-		rules.add(rule);
-	}
-	
-	public void ignoreToken(String tokenName) {
-		ignoreTokens.add(tokenName);
+	public Lexer(Syntax syntax) {
+		this.syntax = syntax;
 	}
 	
 	public void startMatching(CharSequence sequence) {
 		this.subject = sequence;
 		
-		for(LexerRule rule : rules) {
+		for(LexerRule rule : syntax.getLexerRules()) {
 			rule.start(sequence);
 		}
 	}
@@ -71,7 +57,7 @@ public class Lexer {
 	public Token nextRawToken() {
 		if (pointer>=subject.length()) return null;
 		
-		for(LexerRule rule : rules) {
+		for(LexerRule rule : syntax.getLexerRules()) {
 			Matcher matcher = rule.getMatcher();
 			matcher.region(pointer, subject.length());
 			boolean found = matcher.lookingAt();
@@ -86,7 +72,7 @@ public class Lexer {
 			return new Token(rule.getName(), result, startLine, startChar, line, character);
 		}
 		
-		//TODO: There is no good way to handle characters that escape every rule. For now, emit a single-character token for the offending character.
+		//TODO: There is no good way to handle characters that escape every rule. For now, emit a single-character token for the offending character. Maybe later, throw an exception.
 		CharSequence result = subject.subSequence(pointer, pointer+1);
 		int startLine = line;
 		int startChar = character;
@@ -97,7 +83,7 @@ public class Lexer {
 	public Token nextToken() {
 		while(pointer<subject.length()) {
 			Token next = nextRawToken();
-			if (!ignoreTokens.contains(next.getName())) {
+			if (!syntax.getIgnoredTokens().contains(next.getName())) {
 				return next;
 			}
 		}

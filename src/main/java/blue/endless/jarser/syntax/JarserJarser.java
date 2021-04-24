@@ -8,31 +8,32 @@ import blue.endless.jarser.Jarser;
 /** Class for jarsing jarser BNF and lexer rules */
 public class JarserJarser {
 	protected static Jarser createJarser() {
-		Lexer lexer = new Lexer();
+		Syntax.Builder builder = Syntax.builder();
+		//Lexer lexer = new Lexer();
 		
-		lexer.addRule("quoted_string", "\"(?:[^\"\\\\]*(?:\\\\.)?)*\"");
-		lexer.addRule("equals_operator", "=");
-		lexer.addRule("repetition_operator", "[\\*\\?\\+]");
-		lexer.addRule("alternatives_operator", "\\|");
-		lexer.addRule("token", "[a-zA-Z_]+[a-zA-Z0-9_]*");
-		lexer.addRule("parens", "[\\(\\)]");
-		lexer.addRule("whitespace", "\\s+");
-		lexer.ignoreToken("whitespace");
+		builder.addLexerRule("quoted_string", "\"(?:[^\"\\\\]*(?:\\\\.)?)*\"");
+		builder.addLexerRule("equals_operator", "=");
+		builder.addLexerRule("repetition_operator", "[\\*\\?\\+]");
+		builder.addLexerRule("alternatives_operator", "\\|");
+		builder.addLexerRule("token", "[a-zA-Z_]+[a-zA-Z0-9_]*");
+		builder.addLexerRule("parens", "[\\(\\)]");
+		builder.addLexerRule("whitespace", "\\s+");
+		builder.ignoreToken("whitespace");
 		
-		Jarser jarser = new Jarser(lexer);
+		
 		
 		ProductionRule repetitionRule = SequenceProductionRule.of("repetition",
 				ElementProductionRule.matchProduction("token"),
 				ElementProductionRule.matchProduction("repetition_operator")
 				);
-		jarser.addRule(repetitionRule);
+		builder.add(repetitionRule);
 		
 		ProductionRule alternativesRule = SequenceProductionRule.of("alternatives",
 				ElementProductionRule.matchProduction("token"),
 				ElementProductionRule.matchProduction("alternatives_operator"),
 				ElementProductionRule.matchProduction("token")
 				);
-		jarser.addRule(alternativesRule);
+		builder.add(alternativesRule);
 		
 		//TODO: what the hell
 		ProductionRule groupingRule = SequenceProductionRule.of("grouping",
@@ -47,7 +48,7 @@ public class JarserJarser {
 						RepetitionProductionRule.RepetitionType.ONE_OR_MORE
 						)
 				);
-		jarser.addRule(groupingRule);
+		builder.add(groupingRule);
 		
 		ProductionRule productionProductionRule = SequenceProductionRule.of("rule",
 				AlternativesProductionRule.of("nameAlternatives",
@@ -66,7 +67,11 @@ public class JarserJarser {
 						RepetitionProductionRule.RepetitionType.ONE_OR_MORE
 					)
 				);
-		jarser.addRule(productionProductionRule);
+		builder.add(productionProductionRule);
+		
+		Syntax jarserBNF = builder.build();
+		
+		Jarser jarser = new Jarser(jarserBNF);
 		
 		return jarser;
 	}
