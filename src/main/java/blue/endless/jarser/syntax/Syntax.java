@@ -76,7 +76,7 @@ public class Syntax {
 		}
 		
 		public Builder addProductionRule(String rule) throws SyntaxException {
-			productionRules.add(JarserJarser.create(rule));
+			productionRules.add(JarserJarser.parseRule(rule));
 			return this;
 		}
 		

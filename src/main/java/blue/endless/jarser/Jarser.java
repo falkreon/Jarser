@@ -9,6 +9,7 @@
 package blue.endless.jarser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import blue.endless.jarser.syntax.Lexer;
@@ -22,6 +23,7 @@ public class Jarser {
 	protected Syntax syntax;
 	protected Lexer lexer;
 	protected ArrayList<Production> subject = new ArrayList<>();
+	protected boolean finished = false;
 	
 	public Jarser(Syntax syntax) {
 		this.syntax = syntax;
@@ -34,6 +36,12 @@ public class Jarser {
 		return this;
 	}
 	
+	/**
+	 * Start matching against a String. This will completely assemble the String into terminal Tokens,
+	 * and make this Jarser ready to apply production rules.
+	 * @param string
+	 * @return
+	 */
 	public Jarser startMatching(String string) {
 		subject.clear();
 		lexer.startMatching(string);
@@ -46,8 +54,27 @@ public class Jarser {
 	}
 	
 	/**
-	 * 
-	 * @return true if Jarser is still working
+	 * Start matching *within* a Token, preserving the line/character position within that Token. This
+	 * can be especially useful for waterfalling multiple Jarsers together for better control over
+	 * context.
+	 * @param token
+	 * @return
+	 */
+	public Jarser startMatching(Token token) {
+		subject.clear();
+		lexer.startMatching(token);
+		Token cur = lexer.nextToken();
+		while(cur!=null) {
+			subject.add(cur);
+			cur = lexer.nextToken();
+		}
+		return this;
+	}
+	
+	/**
+	 * Attempts to apply a production rule to the production stream to continue grouping it into a
+	 * syntax tree.
+	 * @return true if Jarser is still working, and apply needs to be called again.
 	 */
 	public boolean apply() {
 		ArrayList<Production> nextRound = new ArrayList<>();
@@ -75,13 +102,32 @@ public class Jarser {
 			if (anythingChanged) break;
 		}
 		
+		finished |= !anythingChanged;
 		return anythingChanged;
 	}
 	
+	public boolean isFinished() {
+		return finished;
+	}
+	
 	private static final int ITERATIONS_MAX = 10000;
-	public List<Production> applyAll() {
+	/**
+	 * Applies all production rules, as many times as necessary (up to the maximum iteration count), and returns the assembled syntax tree.
+	 * This method can be safely called multiple times, and the completion status checked with {@link #isFinished()}.
+	 * @param maxIterations a cap on how many times production rules can be applied. Setting this to a negative number allows the Jarser to hang forever.
+	 * @return an immutable List view of the assembled list of productions. If this method is called again, the view will "read through" to the new AST state.
+	 */
+	public List<Production> applyAll(int maxIterations) {
 		int iterations = 0;
-		while(apply() && iterations<=ITERATIONS_MAX) { iterations++; }
-		return new ArrayList<Production>(subject);
+		while(apply() && (maxIterations<0 || iterations<=maxIterations)) { iterations++; }
+		return Collections.unmodifiableList(subject);
+	}
+	
+	/**
+	 * Applies all production rules, up to ten thousand times if necessary, and returns the assembled syntax tree.
+	 * @return
+	 */
+	public List<Production> applyAll() {
+		return applyAll(ITERATIONS_MAX);
 	}
 }

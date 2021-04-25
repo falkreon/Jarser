@@ -7,7 +7,9 @@ import blue.endless.jarser.Jarser;
 
 /** Class for jarsing jarser BNF and lexer rules */
 public class JarserJarser {
-	protected static Jarser createJarser() {
+	public static final Syntax JARSER_SYNTAX = createSyntax();
+	
+	protected static Syntax createSyntax() {
 		Syntax.Builder builder = Syntax.builder();
 		//Lexer lexer = new Lexer();
 		
@@ -15,6 +17,7 @@ public class JarserJarser {
 		builder.addLexerRule("equals_operator", "=");
 		builder.addLexerRule("repetition_operator", "[\\*\\?\\+]");
 		builder.addLexerRule("alternatives_operator", "\\|");
+		builder.addLexerRule("regular_expression", "/^((?:(?:[^?+*{}()[\\]\\\\|]+|\\\\.|\\[(?:\\^?\\\\.|\\^[^\\\\]|[^\\\\^])(?:[^\\]\\\\]+|\\\\.)*\\]|\\((?:\\?[:=!]|\\?<[=!]|\\?>)?(?1)??\\)|\\(\\?(?:R|[+-]?\\d+)\\))(?:(?:[?+*]|\\{\\d+(?:,\\d*)?\\})[?+]?)?|\\|)*)$/");
 		builder.addLexerRule("token", "[a-zA-Z_]+[a-zA-Z0-9_]*");
 		builder.addLexerRule("parens", "[\\(\\)]");
 		builder.addLexerRule("whitespace", "\\s+");
@@ -50,6 +53,16 @@ public class JarserJarser {
 				);
 		builder.add(groupingRule);
 		
+		ProductionRule tokenProductionRule = SequenceProductionRule.of("tokenRule",
+				AlternativesProductionRule.of("nameAlternatives",
+						ElementProductionRule.matchProduction("token"),
+						ElementProductionRule.matchProduction("quoted_string")
+				),
+				ElementProductionRule.matchLiteral("="),
+				ElementProductionRule.matchProduction("token_keyword"),
+				ElementProductionRule.matchProduction("quoted_string")
+				);
+		
 		ProductionRule productionProductionRule = SequenceProductionRule.of("rule",
 				AlternativesProductionRule.of("nameAlternatives",
 						ElementProductionRule.matchProduction("token"),
@@ -69,20 +82,16 @@ public class JarserJarser {
 				);
 		builder.add(productionProductionRule);
 		
-		Syntax jarserBNF = builder.build();
-		
-		Jarser jarser = new Jarser(jarserBNF);
-		
-		return jarser;
+		return builder.build();
 	}
 	
-	public static ProductionRule create(String rule) throws SyntaxException {
-		Jarser jarser = createJarser();
+	public static ProductionRule parseRule(String rule) throws SyntaxException {
+		Jarser jarser = new Jarser(JARSER_SYNTAX);
 		jarser.startMatching(rule);
 		List<Production> ast = jarser.applyAll();
 		
-		if (ast.size()==0) throw new SyntaxException("rule String was empty");
-		if (ast.size()>1) throw new SyntaxException("Extra tokens after end", ast.get(1));
+		if (ast.size()==0) throw new SyntaxException("Rule String was empty");
+		if (ast.size()>1) throw new SyntaxException("Malformed rule", ast.get(1));
 		
 		Production astRoot = ast.get(0);
 		if (astRoot.getName().equals("rule")) {

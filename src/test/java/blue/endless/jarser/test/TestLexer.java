@@ -20,7 +20,7 @@ public class TestLexer {
 	
 	@Test
 	public void testJNF() throws SyntaxException {
-		ProductionRule rule = JarserJarser.create("\"object\" = \"{\" keyValuePair* \"}\"");
+		ProductionRule rule = JarserJarser.parseRule("\"object\" = \"{\" keyValuePair* \"}\"");
 		System.out.println(rule.getName()+" = "+rule);
 		
 	}

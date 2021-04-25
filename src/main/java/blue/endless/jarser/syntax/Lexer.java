@@ -39,6 +39,12 @@ public class Lexer {
 		}
 	}
 	
+	public void startMatching(Token token) {
+		this.subject = token.value();
+		this.line = token.getStartLine();
+		this.character = token.getStartChar();
+	}
+	
 	private void advance() {
 		if (pointer>=subject.length()) return;
 		
