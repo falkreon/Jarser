@@ -9,7 +9,10 @@
 package blue.endless.jarser.syntax;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Token implements Production {
 	protected final String name;
@@ -18,14 +21,20 @@ public class Token implements Production {
 	protected final int startChar;
 	protected final int endLine;
 	protected final int endChar;
+	protected final Map<String, String> namedCaptures;
 	
-	public Token(String name, CharSequence value, int startLine, int startChar, int endLine, int endChar) {
+	public Token(String name, CharSequence value, int startLine, int startChar, int endLine, int endChar, HashMap<String, String> namedCaptures) {
 		this.name = name;
 		this.value = value;
 		this.startLine = startLine;
 		this.startChar = startChar;
 		this.endLine = endLine;
 		this.endChar = endChar;
+		this.namedCaptures = Collections.unmodifiableMap(namedCaptures);
+	}
+	
+	public String getNamedCapture(String name) {
+		return namedCaptures.getOrDefault(name, "");
 	}
 	
 	//implements Production {

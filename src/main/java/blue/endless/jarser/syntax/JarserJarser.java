@@ -14,6 +14,7 @@ public class JarserJarser {
 		//Lexer lexer = new Lexer();
 		
 		builder.addLexerRule("quoted_string", "\"(?:[^\"\\\\]*(?:\\\\.)?)*\"");
+		builder.addLexerRule("regexp", "\\/(?<value>(?:[^\\/\\\\]*(?:\\\\.)?)+)\\/"); // \/(?<value>(?:[^\/\\]*(?:\\.)?)+)\/
 		builder.addLexerRule("equals_operator", "=");
 		builder.addLexerRule("repetition_operator", "[\\*\\?\\+]");
 		builder.addLexerRule("alternatives_operator", "\\|");

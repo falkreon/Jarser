@@ -9,8 +9,10 @@
 package blue.endless.jarser.syntax;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.regex.Matcher;
+
+import com.google.code.regexp.Matcher;
 
 /**
  * This is kind of like Scanner in that it turns a String into tokens. This is unlike Scanner in that:
@@ -74,8 +76,12 @@ public class Lexer {
 			int startLine = line;
 			int startChar = character;
 			advance(end-pointer);
+			HashMap<String, String> captures = new HashMap<>();
+			for(String s : rule.getPattern().groupNames()) {
+				captures.put(s, matcher.group(s));
+			}
 			//System.out.println("MATCHED");
-			return new Token(rule.getName(), result, startLine, startChar, line, character);
+			return new Token(rule.getName(), result, startLine, startChar, line, character, captures);
 		}
 		
 		//TODO: There is no good way to handle characters that escape every rule. For now, emit a single-character token for the offending character. Maybe later, throw an exception.
@@ -83,7 +89,7 @@ public class Lexer {
 		int startLine = line;
 		int startChar = character;
 		advance();
-		return new Token("ERROR", result, startLine, startChar, line, character);
+		return new Token("ERROR", result, startLine, startChar, line, character, new HashMap<>());
 	}
 	
 	public Token nextToken() {

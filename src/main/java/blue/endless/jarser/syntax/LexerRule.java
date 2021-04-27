@@ -8,9 +8,10 @@
 
 package blue.endless.jarser.syntax;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import com.google.code.regexp.Matcher;
+import com.google.code.regexp.Pattern;
 
 public class LexerRule {
 	protected final String name;
