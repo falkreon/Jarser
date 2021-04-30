@@ -51,7 +51,8 @@ public class JarserJarser {
 								ElementProductionRule.matchProduction("alternatives")
 								),
 						RepetitionProductionRule.RepetitionType.ONE_OR_MORE
-						)
+						),
+				ElementProductionRule.matchLiteral(")")
 				);
 		builder.add(groupingRule);
 		
@@ -100,7 +101,7 @@ public class JarserJarser {
 		List<Production> ast = jarser.applyAll();
 		
 		if (ast.size()==0) throw new SyntaxException("Rule String was empty");
-		if (ast.size()>1) throw new SyntaxException("Malformed rule", ast.get(1));
+		if (ast.size()>1) throw new SyntaxException("Malformed rule: "+ast.get(0).getValue(), ast.get(1));
 		
 		Production astRoot = ast.get(0);
 		if (astRoot.getName().equals("rule")) {
@@ -112,9 +113,9 @@ public class JarserJarser {
 			Production ruleNameToken = rulePieces.remove(0);
 			String ruleName;
 			if (ruleNameToken.getName().equals("quoted_string")) {
-				ruleName = ruleNameToken.value().toString().substring(1, ruleNameToken.value().length()-1);
+				ruleName = ruleNameToken.getValue().toString().substring(1, ruleNameToken.getValue().length()-1);
 			} else if (ruleNameToken.getName().equals("token")) {
-				ruleName = ruleNameToken.value().toString();
+				ruleName = ruleNameToken.getValue().toString();
 			} else {
 				throw new SyntaxException("Expected rule name, got "+ruleNameToken.getName());
 			}
@@ -122,8 +123,8 @@ public class JarserJarser {
 			//System.out.println("RuleName: "+ruleName);
 			
 			Production equalsSign = rulePieces.remove(0);
-			if (!equalsSign.getName().equals("equals_operator")) {
-				throw new SyntaxException("Expected '=', found '"+equalsSign.value()+"'", equalsSign);
+			if (!equalsSign.getName().equals("colon_operator")) {
+				throw new SyntaxException("Expected '=', found '"+equalsSign.getValue()+"'", equalsSign);
 			}
 			
 			//The rest of the rule MUST be ProductionRule nodes, which can be grouped up in a SequenceProductionRule.
@@ -149,7 +150,7 @@ public class JarserJarser {
 			if (children.size()>2) throw new SyntaxException("SEVERE: Too many things in a repetition!", children.get(children.size()-1));
 			
 			Production toRepeat = children.get(0);
-			String repeatQualifier = children.get(1).value().toString();
+			String repeatQualifier = children.get(1).getValue().toString();
 			RepetitionProductionRule.RepetitionType repetitionType = RepetitionProductionRule.RepetitionType.ONE_OR_MORE;
 			if (repeatQualifier.equals("+")) {
 				repetitionType = RepetitionProductionRule.RepetitionType.ONE_OR_MORE;
@@ -165,7 +166,7 @@ public class JarserJarser {
 			//TODO: A|B|C, needs tweaks to production rules above first
 			if (children.size()<3) throw new SyntaxException("SEVERE: Not enough tokens to describe alternatives!", children.get(children.size()-1));
 			if (children.size()>3) throw new SyntaxException("SEVERE: Too many parts to an alternative set!", children.get(children.size()-1));
-			if (!children.get(1).value().equals("|")) throw new SyntaxException("SEVERE: expected '|' between alternatives, found '"+children.get(1).value()+"'", children.get(1));
+			if (!children.get(1).getValue().equals("|")) throw new SyntaxException("SEVERE: expected '|' between alternatives, found '"+children.get(1).getValue()+"'", children.get(1));
 			
 			ProductionRule a = makeRule(children.get(0));
 			ProductionRule b = makeRule(children.get(2));
@@ -179,13 +180,13 @@ public class JarserJarser {
 			return SequenceProductionRule.of("grouping", rules);
 			
 		case "token":
-			return ElementProductionRule.matchProduction(prod.value().toString());
+			return ElementProductionRule.matchProduction(prod.getValue().toString());
 			
 		case "quoted_string":
-			return ElementProductionRule.matchLiteral(prod.value().toString().substring(1, prod.value().length()-1));
+			return ElementProductionRule.matchLiteral(prod.getValue().toString().substring(1, prod.getValue().length()-1));
 			
 		default:
-			throw new SyntaxException("Expected part of a production rule, found '"+prod.value()+"'", prod);
+			throw new SyntaxException("Expected part of a production rule, found '"+prod.getValue()+"'", prod);
 		}
 	}
 	
@@ -206,9 +207,9 @@ public class JarserJarser {
 				Production ruleNameToken  = rulePieces.get(0);
 				String ruleName;
 				if (ruleNameToken.getName().equals("quoted_string")) {
-					ruleName = ruleNameToken.value().toString().substring(1, ruleNameToken.value().length()-1); //TODO: use value named-capture group
+					ruleName = ruleNameToken.getValue().toString().substring(1, ruleNameToken.getValue().length()-1); //TODO: use value named-capture group
 				} else if (ruleNameToken.getName().equals("token")) {
-					ruleName = ruleNameToken.value().toString();
+					ruleName = ruleNameToken.getValue().toString();
 				} else {
 					throw new SyntaxException("Expected rule name, got "+ruleNameToken.getName());
 				}
@@ -228,9 +229,10 @@ public class JarserJarser {
 					}
 				} else {
 					//The rest of the rule MUST be ProductionRule nodes, which can be grouped up in a SequenceProductionRule.
-					ProductionRule[] subRules = new ProductionRule[rulePieces.size()];
-					for(int i=0; i<subRules.length; i++) {
-						subRules[i] = makeRule(rulePieces.get(i));
+					ProductionRule[] subRules = new ProductionRule[stuff.size()];
+					for(int i=0; i<stuff.size(); i++) {
+						//System.out.println(stuff.get(i));
+						subRules[i] = makeRule(stuff.get(i));
 					}
 					SequenceProductionRule productionRule = SequenceProductionRule.of(ruleName, subRules);
 					builder.add(productionRule);

@@ -42,7 +42,14 @@ public class Token implements Production {
 		@Override
 		public String getName() { return name; }
 		@Override
-		public CharSequence value() { return value; }
+		public String getValue() {
+			if (namedCaptures.containsKey("value")) return namedCaptures.get("value");
+			return value.toString();
+		}
+		@Override
+		public String getRawValue() {
+			return value.toString();
+		}
 		@Override
 		public int getStartLine() { return startLine; }
 		@Override

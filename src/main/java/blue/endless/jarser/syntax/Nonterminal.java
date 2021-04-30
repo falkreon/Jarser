@@ -96,10 +96,17 @@ public class Nonterminal implements Production {
 		}
 	
 		@Override
-		public CharSequence value() {
+		public String getValue() {
+			return getRawValue();
+		}
+		
+		@Override
+		public String getRawValue() {
+			//TODO: Probably more efficient to build substring from the source text using startChar/startLine/endChar/endLine
+			
 			StringBuilder result = new StringBuilder();
 			for(Production p : children) {
-				result.append(p.value());
+				result.append(p.getValue());
 			}
 			return result.toString();
 		}
@@ -127,7 +134,7 @@ public class Nonterminal implements Production {
 	
 	@Override
 	public String toString() {
-		return value().toString();
+		return getValue();
 		/*
 		StringBuilder result = new StringBuilder();
 		for(int i=0; i<children.size(); i++) {

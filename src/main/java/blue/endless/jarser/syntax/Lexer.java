@@ -42,7 +42,7 @@ public class Lexer {
 	}
 	
 	public void startMatching(Token token) {
-		this.subject = token.value();
+		this.subject = token.getValue();
 		this.line = token.getStartLine();
 		this.character = token.getStartChar();
 	}

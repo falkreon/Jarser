@@ -1,0 +1,22 @@
+//Terminals
+
+line_end_comment:      /\/\/[^\n]*\n/;
+quoted_string:         /\"(?<value>[^\"\\]*(?:\\.)?)*\"/;
+regexp:                /\/(?<value>(?:[^\/\\]*(?:\\.)?)+)\//;
+colon_operator:        /:/;
+repetition_operator:   /[\*\?\+]/;
+alternatives_operator: /\|/;
+rule_end_operator:     /;/;
+token:                 /[a-zA-Z_]+[a-zA-Z0-9_]*/;
+parens:                /[\(\)]/;
+whitespace:            /\s+/;
+ignore whitespace;
+
+//Productions
+repetition: token repetition_operator;
+
+alternatives: token alternatives_operator token;
+
+grouping: "(" (token | quoted_string | repetition | alternatives)+ ")";
+
+rule: ( token | quoted_string ) ":" ( regexp | ( roken | quoted_string | repetition | atlernatives | grouping )+ );

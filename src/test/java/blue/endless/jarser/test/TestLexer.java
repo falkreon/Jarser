@@ -11,17 +11,18 @@ package blue.endless.jarser.test;
 import org.junit.Test;
 
 import blue.endless.jarser.syntax.JarserJarser;
-import blue.endless.jarser.syntax.Lexer;
 import blue.endless.jarser.syntax.ProductionRule;
+import blue.endless.jarser.syntax.Syntax;
 import blue.endless.jarser.syntax.SyntaxException;
-import blue.endless.jarser.syntax.Token;
 
 public class TestLexer {
 	
 	@Test
 	public void testJNF() throws SyntaxException {
-		ProductionRule rule = JarserJarser.parseRule("\"object\" = \"{\" keyValuePair* \"}\"");
-		System.out.println(rule.getName()+" = "+rule);
-		
+		Syntax syntax = JarserJarser.makeSyntax("\"object\" : \"{\" keyValuePair* \"}\";");
+		//ProductionRule rule = JarserJarser.parseRule("\"object\" : \"{\" keyValuePair* \"}\"");
+		for(ProductionRule rule : syntax.getProductionRules()) {
+			System.out.println(rule.getName()+" = "+rule);
+		}
 	}
 }

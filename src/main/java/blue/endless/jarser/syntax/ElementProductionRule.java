@@ -22,7 +22,7 @@ public class ElementProductionRule implements ProductionRule {
 		
 		Production firstElement = productions.get(0);
 		if (isLiteral) {
-			return firstElement.value().equals(elementName);
+			return firstElement.getValue().equals(elementName);
 		} else {
 			return firstElement.getName().equals(elementName);
 		}

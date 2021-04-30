@@ -15,7 +15,8 @@ import java.util.List;
  */
 public interface Production {
 	public String getName();
-	public CharSequence value();
+	public String getValue();
+	public String getRawValue();
 	public int getStartLine();
 	public int getStartChar();
 	public int getEndLine();
