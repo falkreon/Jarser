@@ -38,16 +38,12 @@ public class TestLexer {
 	@Test
 	public void testFormalBNF() throws SyntaxException, IOException {
 		String file = Files.lines(new File("doc/jarser.bnf").toPath()).reduce((String a,String b)->a+'\n'+b).get(); //Is this really the easiest way to turn a file into a string?
-		System.out.println(file);
-		Syntax syntax = JarserJarser.makeSyntax(file);
-		System.out.println("Assembled lexer rules:");
-		for(LexerRule rule : syntax.getLexerRules()) {
-			System.out.println("  "+rule.getName()+" : "+rule);
-		}
 		
-		System.out.println("Assembled production rules:");
-		for(ProductionRule rule : syntax.getProductionRules()) {
-			System.out.println("  "+rule.getName()+" : "+rule);
-		}
+		Syntax syntax = JarserJarser.makeSyntax(file);
+		
+		//Check to see that the correct counts of everything were unpacked from the bnf
+		Assert.assertEquals(10, syntax.getLexerRules().size());
+		Assert.assertEquals(1, syntax.getIgnoredTokens().size());
+		Assert.assertEquals(8, syntax.getProductionRules().size());
 	}
 }
