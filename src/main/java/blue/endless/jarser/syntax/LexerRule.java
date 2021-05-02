@@ -20,7 +20,7 @@ public class LexerRule {
 	
 	public LexerRule(String name, String pattern) throws PatternSyntaxException {
 		this.name = name;
-		this.pattern = Pattern.compile(pattern);
+		this.pattern = Pattern.compile(pattern, Pattern.MULTILINE);
 	}
 	
 	public String getName() { return name; }

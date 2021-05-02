@@ -13,7 +13,7 @@ public class JarserJarser {
 		Syntax.Builder builder = Syntax.builder();
 		//Lexer lexer = new Lexer();
 		
-		builder.addLexerRule("line_end_comment", "\\/\\/[^\n]*\n");
+		builder.addLexerRule("line_end_comment", "\\/\\/[^$\\n]*[\\n$]");
 		builder.addLexerRule("quoted_string", "\"(?:[^\"\\\\]*(?:\\\\.)?)*\"");
 		builder.addLexerRule("regexp", "\\/(?<value>(?:[^\\/\\\\]*(?:\\\\.)?)+)\\/"); // \/(?<value>(?:[^\/\\]*(?:\\.)?)+)\/
 		//builder.addLexerRule("equals_operator", "=");

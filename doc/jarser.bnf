@@ -1,6 +1,6 @@
 //Terminals
 
-line_end_comment:      /\/\/[^\n]*\n/;
+line_end_comment:      /\/\/[^$\n]*[$\n]/;
 quoted_string:         /\"(?<value>[^\"\\]*(?:\\.)?)*\"/;
 regexp:                /\/(?<value>(?:[^\/\\]*(?:\\.)?)+)\//;
 colon_operator:        /:/;
