@@ -29,68 +29,70 @@ public class JarserJarser {
 		
 		
 		ProductionRule repetitionRule = SequenceProductionRule.of("repetition",
-				ElementProductionRule.matchProduction("token"),
+				ElementProductionRule.matchProduction("subrule"),
 				ElementProductionRule.matchProduction("repetition_operator")
 				);
 		builder.add(repetitionRule);
 		
 		ProductionRule alternativesRule = SequenceProductionRule.of("alternatives",
-				ElementProductionRule.matchProduction("token"),
-				ElementProductionRule.matchProduction("alternatives_operator"),
-				ElementProductionRule.matchProduction("token")
+					ElementProductionRule.matchProduction("subrule"),
+					ElementProductionRule.matchProduction("alternatives_operator"),
+					ElementProductionRule.matchProduction("subrule")
 				);
 		builder.add(alternativesRule);
 		
 		ProductionRule groupingRule = SequenceProductionRule.of("grouping",
 				ElementProductionRule.matchLiteral("("),
 				RepetitionProductionRule.with(
-						AlternativesProductionRule.of("repetitionAlternatives",
-								ElementProductionRule.matchProduction("token"),
-								ElementProductionRule.matchProduction("quoted_string"),
-								ElementProductionRule.matchProduction("repetition"),
-								ElementProductionRule.matchProduction("alternatives")
-								),
+						ElementProductionRule.matchProduction("subrule"),
 						RepetitionProductionRule.RepetitionType.ONE_OR_MORE
 						),
 				ElementProductionRule.matchLiteral(")")
 				);
 		builder.add(groupingRule);
 		
-		/*
-		ProductionRule tokenProductionRule = SequenceProductionRule.of("tokenRule",
-				AlternativesProductionRule.of("nameAlternatives",
-						ElementProductionRule.matchProduction("token"),
-						ElementProductionRule.matchProduction("quoted_string")
-				),
-				ElementProductionRule.matchLiteral(":"),
-				ElementProductionRule.matchProduction("token_keyword"),
-				ElementProductionRule.matchProduction("quoted_string")
-				);*/
+		ProductionRule lexerProductionRule = SequenceProductionRule.of("lexerRule",
+				ElementProductionRule.matchProduction("rule_name"),
+				ElementProductionRule.matchProduction("regexp"),
+				ElementProductionRule.matchLiteral(";")
+				);
+		builder.add(lexerProductionRule);
 		
+		//TODO: Keys in this rule may get eaten by the subrule rule!
 		ProductionRule productionProductionRule = SequenceProductionRule.of("rule",
-				AlternativesProductionRule.of("nameAlternatives",
-						ElementProductionRule.matchProduction("token"),
-						ElementProductionRule.matchProduction("quoted_string")
-				),
-				ElementProductionRule.matchLiteral(":"),
-				AlternativesProductionRule.of("tokenOrProduction",
-					//Production
-					RepetitionProductionRule.with(
-							AlternativesProductionRule.of("repetitionAlternatives",
-									ElementProductionRule.matchProduction("token"),
-									ElementProductionRule.matchProduction("quoted_string"),
-									ElementProductionRule.matchProduction("repetition"),
-									ElementProductionRule.matchProduction("alternatives"),
-									ElementProductionRule.matchProduction("grouping")
-									),
-							RepetitionProductionRule.RepetitionType.ONE_OR_MORE
-					),
-					//Token
-					ElementProductionRule.matchProduction("regexp")
+				ElementProductionRule.matchProduction("rule_name"),
+				RepetitionProductionRule.with(
+						ElementProductionRule.matchProduction("subrule"),
+						RepetitionProductionRule.RepetitionType.ONE_OR_MORE
 				),
 				ElementProductionRule.matchLiteral(";")
-			);
+				);
 		builder.add(productionProductionRule);
+		
+		ProductionRule ignoreRule = SequenceProductionRule.of("ignore_rule",
+				ElementProductionRule.matchLiteral("ignore"),
+				ElementProductionRule.matchProduction("token"),
+				ElementProductionRule.matchLiteral(";")
+				);
+		builder.add(ignoreRule);
+		
+		ProductionRule ruleName = SequenceProductionRule.of("rule_name",
+				AlternativesProductionRule.of("nameAlternatives",
+						ElementProductionRule.matchProduction("token"),
+						ElementProductionRule.matchProduction("quoted_string")
+				),
+				ElementProductionRule.matchLiteral(":")
+				);
+		builder.add(ruleName);
+		
+		ProductionRule subruleRule = AlternativesProductionRule.of("subrule",
+				ElementProductionRule.matchProduction("token"),
+				ElementProductionRule.matchProduction("quoted_string"),
+				ElementProductionRule.matchProduction("repetition"),
+				ElementProductionRule.matchProduction("alternatives"),
+				ElementProductionRule.matchProduction("grouping")
+				);
+		builder.add(subruleRule);
 		
 		return builder.build();
 	}
@@ -184,9 +186,25 @@ public class JarserJarser {
 			
 		case "quoted_string":
 			return ElementProductionRule.matchLiteral(prod.getValue().toString().substring(1, prod.getValue().length()-1));
-			
+		//case "parens": //Implicit grouping
+			//ProductionRule[] rules = new ProductionRule[children.size()-2];
 		default:
-			throw new SyntaxException("Expected part of a production rule, found '"+prod.getValue()+"'", prod);
+			throw new SyntaxException("Expected part of a production rule, found '"+prod.getName()+"("+prod.getValue()+")'", prod);
+		}
+	}
+	
+	public static ProductionRule parseSubrule(Production p) {
+		if (!p.getName().equals("subrule")) throw new IllegalArgumentException("parseSubrule can only process 'subrule' nodes");
+		List<Production> p_ch = p.getChildren();
+		if (p_ch.size()>1) throw new IllegalArgumentException("SEVERE: subrule has too many child nodes!");
+		
+		Production subruleChild = p_ch.get(0);
+		switch(subruleChild.getName()) {
+		
+		
+		
+		default:
+			throw new IllegalArgumentException("Unknown subrule type: '"+subruleChild.getName()+"'");
 		}
 	}
 	
@@ -198,11 +216,23 @@ public class JarserJarser {
 		Syntax.Builder builder = Syntax.builder();
 		for(Production p : ast) {
 			if (p.getName().equals("rule")) {
+				//TODO: Fix for new ruleName and subrule production nodes
+				
+				//Copy into a mutable list
+				ArrayList<Production> rulePieces = new ArrayList<>(p.getChildren());
+				Production nameProduction = rulePieces.remove(0);
+				Production tail = rulePieces.remove(rulePieces.size()-1);
+				if (!tail.getValue().equals(";")) throw new SyntaxException("SEVERE: Rule does not end with semicolon");
+				String ruleName = nameProduction.getChildren().get(0).getValue();
+				System.out.println("RULE> "+ruleName+" : "+rulePieces);
+				System.out.println(p.recursiveExplain());
 				/* 
 				 * There should be 5 kinds of rulePieces: name, colon_operator, [stuff]+, semicolon.
 				 * The first element will be name. Second is colon. Last is semicolon. Everything else is the meat, the Stuff inside the rule.
 				 */
+				/*
 				List<Production> rulePieces = p.getChildren();
+				System.out.println(rulePieces);
 				//String ruleName = rulePieces.get(0).value().toString();
 				Production ruleNameToken  = rulePieces.get(0);
 				String ruleName;
@@ -236,7 +266,16 @@ public class JarserJarser {
 					}
 					SequenceProductionRule productionRule = SequenceProductionRule.of(ruleName, subRules);
 					builder.add(productionRule);
-				}
+				}*/
+			} else if (p.getName().equals("lexerRule")) {
+				//System.out.println("Lexer Rule: "+ p.getChildren().get(1).getValue());
+				builder.addLexerRule(p.getChildren().get(0).getChildren().get(0).getValue(), p.getChildren().get(1).getValue());
+			} else if (p.getName().equals("line_end_comment")) {
+				//do nothing
+			} else if (p.getName().equals("ignore_rule")) {
+				builder.ignoreToken(p.getChildren().get(1).getValue());
+			} else {
+				System.out.println("Bad token: "+p.getName()+"("+p.getValue()+")");
 			}
 		}
 		

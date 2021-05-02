@@ -19,4 +19,6 @@ alternatives: token alternatives_operator token;
 
 grouping: "(" (token | quoted_string | repetition | alternatives)+ ")";
 
-rule: ( token | quoted_string ) ":" ( regexp | ( roken | quoted_string | repetition | atlernatives | grouping )+ );
+//rule: ( token | quoted_string ) ":" ( regexp | ( token | quoted_string | repetition | atlernatives | grouping )+ );
+
+ignoreRule: "ignore" token ";";

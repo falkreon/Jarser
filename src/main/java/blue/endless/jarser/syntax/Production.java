@@ -8,6 +8,7 @@
 
 package blue.endless.jarser.syntax;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,4 +25,49 @@ public interface Production {
 	
 	public List<Production> getChildren();
 	public boolean isTerminal();
+	
+	public default String explain() {
+		List<Production> children = getChildren();
+		if (children.size()==0) return "["+this.getName()+":\""+this.getRawValue()+"\"]";
+		
+		StringBuilder childResultBuilder = new StringBuilder();
+		for(Production p : children) {
+			childResultBuilder.append(p.explain());
+		}
+		String childResult = childResultBuilder.toString();
+		//int total = childResult.length();
+		String selfResult = this.getName()+":\""+this.getRawValue()+"\"";
+		//if (selfResult.length()+1>childResult.length()) {
+			//strip the far-right brace and pad the last child
+			//childResult = childResult.substring(0, childResult.length()-1);
+			//int toAdd = selfResult.length()+2-childResult.length()-1;
+			//for(int i=0; i<toAdd; i++) childResult += ' ';
+			//childResult += ']';
+		//} else
+		if (childResult.length()>selfResult.length()+2) {
+			int toAdd = childResult.length() - (selfResult.length()+2);
+			int addLeft = toAdd/2;
+			for(int i=0; i<addLeft; i++) selfResult = ' '+selfResult;
+			int addRight = toAdd - addLeft;
+			for(int i=0; i<addRight; i++) selfResult = selfResult+' ';
+		}
+		
+		return "["+selfResult+"]";
+	}
+	
+	public default String recursiveExplain() {
+		ArrayList<Production> nextLineQueue = new ArrayList<>();
+		nextLineQueue.add(this);
+		StringBuilder result = new StringBuilder();
+		while(!nextLineQueue.isEmpty()) {
+			ArrayList<Production> currentLineQueue = new ArrayList<>(nextLineQueue);
+			nextLineQueue.clear();
+			for(Production p : currentLineQueue) {
+				result.append(p.explain());
+				nextLineQueue.addAll(p.getChildren());
+			}
+			result.append("\n");
+		}
+		return result.toString();
+	}
 }
