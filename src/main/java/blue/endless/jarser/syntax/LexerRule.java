@@ -30,4 +30,8 @@ public class LexerRule {
 	}
 	public Matcher getMatcher() { return matcher; }
 	
+	@Override
+	public String toString() {
+		return "/"+pattern.standardPattern()+"/";
+	}
 }

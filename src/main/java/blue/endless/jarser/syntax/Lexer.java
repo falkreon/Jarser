@@ -27,13 +27,13 @@ public class Lexer {
 	protected int line = 0;
 	protected int character = 0;
 	protected Syntax syntax;
-	protected CharSequence subject;
+	protected String subject;
 	
 	public Lexer(Syntax syntax) {
 		this.syntax = syntax;
 	}
 	
-	public void startMatching(CharSequence sequence) {
+	public void startMatching(String sequence) {
 		this.subject = sequence;
 		
 		for(LexerRule rule : syntax.getLexerRules()) {
@@ -72,7 +72,7 @@ public class Lexer {
 			if (!found) continue;
 			
 			int end = matcher.end();
-			CharSequence result = subject.subSequence(pointer, end);
+			String result = subject.substring(pointer, end);
 			int startLine = line;
 			int startChar = character;
 			advance(end-pointer);
@@ -81,15 +81,15 @@ public class Lexer {
 				captures.put(s, matcher.group(s));
 			}
 			//System.out.println("MATCHED");
-			return new Token(rule.getName(), result, startLine, startChar, line, character, captures);
+			return new Token(rule.getName(), result, startLine, startChar, line, character, subject, captures);
 		}
 		
 		//TODO: There is no good way to handle characters that escape every rule. For now, emit a single-character token for the offending character. Maybe later, throw an exception.
-		CharSequence result = subject.subSequence(pointer, pointer+1);
+		String result = subject.substring(pointer, pointer+1);
 		int startLine = line;
 		int startChar = character;
 		advance();
-		return new Token("ERROR", result, startLine, startChar, line, character, new HashMap<>());
+		return new Token("ERROR", result, startLine, startChar, line, character, subject, new HashMap<>());
 	}
 	
 	public Token nextToken() {

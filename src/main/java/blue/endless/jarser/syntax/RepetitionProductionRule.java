@@ -91,6 +91,7 @@ public class RepetitionProductionRule implements ProductionRule {
 	@Override
 	public String toString() {
 		String result = delegate.toString();
+		//System.out.println("DELEGATE IS "+delegate);
 		
 		switch(type) {
 		case ONE_OR_MORE:

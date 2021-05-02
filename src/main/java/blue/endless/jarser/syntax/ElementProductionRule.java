@@ -45,6 +45,6 @@ public class ElementProductionRule implements ProductionRule {
 	
 	@Override
 	public String toString() {
-		return getName();
+		return (elementName==null) ? "nullElement" : getName();
 	}
 }

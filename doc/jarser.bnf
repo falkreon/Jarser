@@ -13,12 +13,18 @@ whitespace:            /\s+/;
 ignore whitespace;
 
 //Productions
-repetition: token repetition_operator;
+repetition:   subrule repetition_operator;
 
-alternatives: token alternatives_operator token;
+alternatives: subrule alternatives_operator subrule;
 
-grouping: "(" (token | quoted_string | repetition | alternatives)+ ")";
+grouping:     "(" subrule+ ")";
 
-//rule: ( token | quoted_string ) ":" ( regexp | ( token | quoted_string | repetition | atlernatives | grouping )+ );
+lexerRule:    rule_name regexp ";";
 
-ignoreRule: "ignore" token ";";
+rule:         rule_name subrule+ ";";
+
+ignore_rule:  "ignore" token ";";
+
+rule_name:    token | quoted_string ":";
+
+subrule:      token | quoted_string | repetition | alternatives | grouping;

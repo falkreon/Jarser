@@ -41,4 +41,17 @@ public class AlternativesProductionRule implements ProductionRule {
 	public static AlternativesProductionRule of(String name, ProductionRule... alternatives) {
 		return new AlternativesProductionRule(name, alternatives);
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		for(int i=0; i<alternatives.size(); i++) {
+			result.append(alternatives.get(i));
+			if (i<alternatives.size()-1) {
+				result.append('|');
+			}
+		}
+		
+		return result.toString();
+	}
 }

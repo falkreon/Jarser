@@ -18,6 +18,7 @@ public interface Production {
 	public String getName();
 	public String getValue();
 	public String getRawValue();
+	public String getSource();
 	public int getStartLine();
 	public int getStartChar();
 	public int getEndLine();
@@ -37,6 +38,7 @@ public interface Production {
 		String childResult = childResultBuilder.toString();
 		//int total = childResult.length();
 		String selfResult = this.getName()+":\""+this.getRawValue()+"\"";
+		//TODO: Move this child-node-expansion work to recursiveExplain somehow
 		//if (selfResult.length()+1>childResult.length()) {
 			//strip the far-right brace and pad the last child
 			//childResult = childResult.substring(0, childResult.length()-1);

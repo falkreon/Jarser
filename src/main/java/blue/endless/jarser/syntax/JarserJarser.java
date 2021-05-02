@@ -132,7 +132,7 @@ public class JarserJarser {
 			//The rest of the rule MUST be ProductionRule nodes, which can be grouped up in a SequenceProductionRule.
 			ProductionRule[] subRules = new ProductionRule[rulePieces.size()];
 			for(int i=0; i<subRules.length; i++) {
-				subRules[i] = makeRule(rulePieces.get(i));
+				subRules[i] = makeSubrule(rulePieces.get(i));
 			}
 			return SequenceProductionRule.of(ruleName, subRules);
 			
@@ -141,7 +141,12 @@ public class JarserJarser {
 		}
 	}
 	
-	private static ProductionRule makeRule(Production prod) throws SyntaxException {
+	private static ProductionRule makeSubrule(Production prod) throws SyntaxException {
+		if (!prod.getName().equals("subrule")) throw new IllegalArgumentException("Can only unpack subrules. got "+prod.getName()+": '"+prod.getValue()+"'");
+		if (prod.getChildren().size()!=1) throw new SyntaxException("Expected subrule node to have one child, found "+prod.getChildren().size());
+		
+		prod = prod.getChildren().get(0); //subrule parent has been validated, now work with the subrule child
+		
 		String ruleClass = prod.getName();
 		List<Production> children = prod.getChildren();
 		switch(ruleClass) {
@@ -161,7 +166,8 @@ public class JarserJarser {
 			} else if (repeatQualifier.equals("?")) {
 				repetitionType = RepetitionProductionRule.RepetitionType.ZERO_OR_ONE;
 			}
-			ProductionRule repeatedRule = makeRule(toRepeat);
+			
+			ProductionRule repeatedRule = makeSubrule(toRepeat);
 			return RepetitionProductionRule.with(repeatedRule, repetitionType);
 			
 		case "alternatives":
@@ -170,14 +176,19 @@ public class JarserJarser {
 			if (children.size()>3) throw new SyntaxException("SEVERE: Too many parts to an alternative set!", children.get(children.size()-1));
 			if (!children.get(1).getValue().equals("|")) throw new SyntaxException("SEVERE: expected '|' between alternatives, found '"+children.get(1).getValue()+"'", children.get(1));
 			
-			ProductionRule a = makeRule(children.get(0));
-			ProductionRule b = makeRule(children.get(2));
+			ProductionRule a = makeSubrule(children.get(0));
+			ProductionRule b = makeSubrule(children.get(2));
 			return AlternativesProductionRule.of("alternatives", a, b);
 			
 		case "grouping":
-			ProductionRule[] rules = new ProductionRule[children.size()];
+			List<Production> groupingChildren = new ArrayList<>(children);
+			Production openParen = groupingChildren.remove(0);
+			Production closeParen = groupingChildren.remove(groupingChildren.size()-1);
+			
+			ProductionRule[] rules = new ProductionRule[groupingChildren.size()];
 			for(int i=0; i<rules.length; i++) {
-				rules[i] = makeRule(children.get(i));
+				rules[i] = makeSubrule(groupingChildren.get(i));
+				//System.out.println("Assembled "+rules[i]);
 			}
 			return SequenceProductionRule.of("grouping", rules);
 			
@@ -186,8 +197,6 @@ public class JarserJarser {
 			
 		case "quoted_string":
 			return ElementProductionRule.matchLiteral(prod.getValue().toString().substring(1, prod.getValue().length()-1));
-		//case "parens": //Implicit grouping
-			//ProductionRule[] rules = new ProductionRule[children.size()-2];
 		default:
 			throw new SyntaxException("Expected part of a production rule, found '"+prod.getName()+"("+prod.getValue()+")'", prod);
 		}
@@ -224,8 +233,21 @@ public class JarserJarser {
 				Production tail = rulePieces.remove(rulePieces.size()-1);
 				if (!tail.getValue().equals(";")) throw new SyntaxException("SEVERE: Rule does not end with semicolon");
 				String ruleName = nameProduction.getChildren().get(0).getValue();
-				System.out.println("RULE> "+ruleName+" : "+rulePieces);
-				System.out.println(p.recursiveExplain());
+				//System.out.println("RULE> "+ruleName+" : "+rulePieces);
+				
+				
+				ProductionRule[] subrules = new ProductionRule[rulePieces.size()];
+				for(int i=0; i<subrules.length; i++) {
+					Production child = rulePieces.get(i);
+					if (child.getName().equals("subrule")) {
+						subrules[i] = makeSubrule(child);
+					} else {
+						throw new SyntaxException("Expected subrule, got '"+child.getName()+"'.", child);
+					}
+				}
+				SequenceProductionRule rule = SequenceProductionRule.of(ruleName, subrules);
+				builder.add(rule);
+				//System.out.println(p.recursiveExplain());
 				/* 
 				 * There should be 5 kinds of rulePieces: name, colon_operator, [stuff]+, semicolon.
 				 * The first element will be name. Second is colon. Last is semicolon. Everything else is the meat, the Stuff inside the rule.

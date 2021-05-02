@@ -111,6 +111,8 @@ defaultTasks "clean", "build", "sourcesJar";
 dependencies {
 	testCompile "junit:junit:4.12";
 	testCompile 'com.github.tony19:named-regexp:0.2.6';
+	//testCompile 'org.slf4j:slf4j-api:1.7.9';
+	testCompile 'org.slf4j:slf4j-simple:1.7.9';
 	
 	compileOnly 'org.slf4j:slf4j-api:1.7.9';
 	compileOnly 'org.checkerframework:checker-qual:2.5.6';

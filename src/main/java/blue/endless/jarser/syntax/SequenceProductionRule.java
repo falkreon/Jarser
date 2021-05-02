@@ -51,7 +51,12 @@ public class SequenceProductionRule implements ProductionRule {
 		if (elements.isEmpty()) return "()";
 		StringBuilder result = new StringBuilder();
 		for(int i=0; i<elements.size(); i++) {
-			result.append(elements.get(i).toString());
+			ProductionRule element = elements.get(i);
+			if (element==null) {
+				result.append("NULL");
+			} else {
+				result.append(element.toString());
+			}
 			if (i<elements.size()-1) result.append(" ");
 		}
 		return result.toString();

@@ -16,20 +16,22 @@ import java.util.Map;
 
 public class Token implements Production {
 	protected final String name;
-	protected final CharSequence value;
+	protected final String value;
+	protected final String source;
 	protected final int startLine;
 	protected final int startChar;
 	protected final int endLine;
 	protected final int endChar;
 	protected final Map<String, String> namedCaptures;
 	
-	public Token(String name, CharSequence value, int startLine, int startChar, int endLine, int endChar, HashMap<String, String> namedCaptures) {
+	public Token(String name, String value, int startLine, int startChar, int endLine, int endChar, String source, HashMap<String, String> namedCaptures) {
 		this.name = name;
 		this.value = value;
 		this.startLine = startLine;
 		this.startChar = startChar;
 		this.endLine = endLine;
 		this.endChar = endChar;
+		this.source = source;
 		this.namedCaptures = Collections.unmodifiableMap(namedCaptures);
 	}
 	
@@ -44,11 +46,15 @@ public class Token implements Production {
 		@Override
 		public String getValue() {
 			if (namedCaptures.containsKey("value")) return namedCaptures.get("value");
-			return value.toString();
+			return value;
 		}
 		@Override
 		public String getRawValue() {
-			return value.toString();
+			return value;
+		}
+		@Override
+		public String getSource() {
+			return source;
 		}
 		@Override
 		public int getStartLine() { return startLine; }

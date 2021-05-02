@@ -12,8 +12,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Nonterminal implements Production {
+	private static final Logger log = LoggerFactory.getLogger(Nonterminal.class);
 	protected final String name;
+	protected String source = "";
 	protected ArrayList<Production> children = new ArrayList<>();
 	protected int startLine = 0;
 	protected int startChar = 0;
@@ -33,9 +38,13 @@ public class Nonterminal implements Production {
 			this.startChar = p.getStartChar();
 			this.endLine = p.getEndLine();
 			this.endChar = p.getEndChar();
+			this.source = p.getSource();
 		} else {
 			include(p.getStartLine(), p.getStartChar());
 			include(p.getEndLine(), p.getEndChar());
+			if (p.getSource()!=source) { //(sic). We really do want to pass the same source file *object* around, not just the same characters. equals() can be a lot slower, too, for long strings with matching sizes.
+				log.warn("Nonterminal inherits different source String objects from its children. File traces from these symbols may be inconsistent!");
+			}
 		}
 		return children.add(p);
 	}
@@ -109,6 +118,11 @@ public class Nonterminal implements Production {
 				result.append(p.getValue());
 			}
 			return result.toString();
+		}
+		
+		@Override
+		public String getSource() {
+			return this.source;
 		}
 	
 		@Override
