@@ -11,9 +11,9 @@ package blue.endless.jarser.json;
 import blue.endless.jarser.syntax.ElementProductionRule;
 import blue.endless.jarser.syntax.RepetitionProductionRule;
 import blue.endless.jarser.syntax.SequenceProductionRule;
-import blue.endless.jarser.syntax.Syntax;
+import blue.endless.jarser.syntax.Grammar;
 
-public class JsonSyntax extends Syntax {
+public class JsonSyntax extends Grammar {
 	public JsonSyntax() {
 		SequenceProductionRule object = SequenceProductionRule.of(
 				"object",

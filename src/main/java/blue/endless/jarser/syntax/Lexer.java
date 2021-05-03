@@ -26,10 +26,10 @@ public class Lexer {
 	protected int pointer = 0;
 	protected int line = 0;
 	protected int character = 0;
-	protected Syntax syntax;
+	protected Grammar syntax;
 	protected String subject;
 	
-	public Lexer(Syntax syntax) {
+	public Lexer(Grammar syntax) {
 		this.syntax = syntax;
 	}
 	

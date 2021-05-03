@@ -15,10 +15,10 @@ import blue.endless.jarser.Jarser;
 
 /** Class for jarsing jarser BNF and lexer rules */
 public class JarserJarser {
-	public static final Syntax JARSER_SYNTAX = createSyntax();
+	public static final Grammar JARSER_SYNTAX = createSyntax();
 	
-	protected static Syntax createSyntax() {
-		Syntax.Builder builder = Syntax.builder();
+	protected static Grammar createSyntax() {
+		Grammar.Builder builder = Grammar.builder();
 		//Lexer lexer = new Lexer();
 		
 		builder.addLexerRule("line_end_comment", "\\/\\/[^$\\n]*[\\n$]");
@@ -225,12 +225,12 @@ public class JarserJarser {
 		}
 	}
 	
-	public static Syntax makeSyntax(String s) throws SyntaxException {
+	public static Grammar makeSyntax(String s) throws SyntaxException {
 		Jarser jarser = new Jarser(JARSER_SYNTAX);
 		jarser.startMatching(s);
 		List<Production> ast = jarser.applyAll();
 		
-		Syntax.Builder builder = Syntax.builder();
+		Grammar.Builder builder = Grammar.builder();
 		for(Production p : ast) {
 			if (p.getName().equals("rule")) {
 				//TODO: Fix for new ruleName and subrule production nodes

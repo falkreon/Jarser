@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Syntax {
+public class Grammar {
 	protected List<LexerRule> lexerRules;
 	protected Set<String> ignoreTokens;
 	protected List<ProductionRule> productionRules;
@@ -54,9 +54,9 @@ public class Syntax {
 		
 		protected Builder() {}
 		
-		public Syntax build() {
+		public Grammar build() {
 			frozen = true;
-			Syntax syntax = new Syntax();
+			Grammar syntax = new Grammar();
 			syntax.lexerRules = Collections.unmodifiableList(lexerRules);
 			syntax.ignoreTokens = Collections.unmodifiableSet(ignoreTokens);
 			syntax.productionRules = Collections.unmodifiableList(productionRules);
@@ -90,5 +90,9 @@ public class Syntax {
 			if (frozen) throw new IllegalStateException();
 			ignoreTokens.add(tokenName);
 		}
+	}
+	
+	public static Grammar of(String bnf) throws SyntaxException {
+		return JarserJarser.makeSyntax(bnf);
 	}
 }

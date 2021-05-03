@@ -16,16 +16,16 @@ import blue.endless.jarser.syntax.Lexer;
 import blue.endless.jarser.syntax.Nonterminal;
 import blue.endless.jarser.syntax.Production;
 import blue.endless.jarser.syntax.ProductionRule;
-import blue.endless.jarser.syntax.Syntax;
+import blue.endless.jarser.syntax.Grammar;
 import blue.endless.jarser.syntax.Token;
 
 public class Jarser {
-	protected Syntax syntax;
+	protected Grammar syntax;
 	protected Lexer lexer;
 	protected ArrayList<Production> subject = new ArrayList<>();
 	protected boolean finished = false;
 	
-	public Jarser(Syntax syntax) {
+	public Jarser(Grammar syntax) {
 		this.syntax = syntax;
 		this.lexer = new Lexer(syntax);
 	}

@@ -20,14 +20,14 @@ import org.junit.Test;
 import blue.endless.jarser.syntax.JarserJarser;
 import blue.endless.jarser.syntax.LexerRule;
 import blue.endless.jarser.syntax.ProductionRule;
-import blue.endless.jarser.syntax.Syntax;
+import blue.endless.jarser.syntax.Grammar;
 import blue.endless.jarser.syntax.SyntaxException;
 
 public class TestLexer {
 	
 	@Test
 	public void testSingleLine() throws SyntaxException {
-		Syntax syntax = JarserJarser.makeSyntax("\"object\" : \"{\" keyValuePair* \"}\";");
+		Grammar syntax = JarserJarser.makeSyntax("\"object\" : \"{\" keyValuePair* \"}\";");
 		Assert.assertTrue(syntax.getLexerRules().isEmpty());
 		Assert.assertEquals(1, syntax.getProductionRules().size());
 		//for(ProductionRule rule : syntax.getProductionRules()) {
@@ -39,7 +39,7 @@ public class TestLexer {
 	public void testFormalBNF() throws SyntaxException, IOException {
 		String file = Files.lines(new File("doc/jarser.bnf").toPath()).reduce((String a,String b)->a+'\n'+b).get(); //Is this really the easiest way to turn a file into a string?
 		
-		Syntax syntax = JarserJarser.makeSyntax(file);
+		Grammar syntax = JarserJarser.makeSyntax(file);
 		
 		//Check to see that the correct counts of everything were unpacked from the bnf
 		Assert.assertEquals(10, syntax.getLexerRules().size());
