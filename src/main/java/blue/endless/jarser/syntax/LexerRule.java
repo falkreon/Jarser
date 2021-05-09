@@ -20,7 +20,30 @@ public class LexerRule {
 	
 	public LexerRule(String name, String pattern) throws PatternSyntaxException {
 		this.name = name;
-		this.pattern = Pattern.compile(pattern, Pattern.MULTILINE);
+		
+		//unpack multiline patterns
+		if (pattern.contains("\n")) {
+			StringBuilder folded = new StringBuilder();
+			String[] lines = pattern.split("\\n");
+			for(String line : lines) {
+				//Trim *leading* whitespace
+				while (!line.isEmpty() && Character.isWhitespace(line.charAt(0))) {
+					line = line.substring(1);
+				}
+				
+				int commentStart = line.indexOf("//");
+				if (commentStart>=0) {
+					line = line.substring(0, commentStart).trim(); //Grab trailing whitespace too
+				}
+				
+				folded.append(line);
+			}
+			
+			pattern = folded.toString();
+		}
+		
+		this.pattern = Pattern.compile(pattern, Pattern.MULTILINE | java.util.regex.Pattern.UNICODE_CHARACTER_CLASS | Pattern.COMMENTS );
+		
 	}
 	
 	public String getName() { return name; }
